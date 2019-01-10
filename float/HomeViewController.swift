@@ -8,7 +8,7 @@
 
 import UIKit
 
-class HomeViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OptionButtonsDelegate, UITextFieldDelegate {
+class HomeViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OptionButtonsForListCellDelegate, UITextFieldDelegate {
     /*
      image Source 위치 변수
      */
@@ -48,8 +48,10 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     @IBOutlet weak var noteCardTableView: UITableView!
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "noteCardCell") as! noteCardTableViewCell
-        cell.delegate = self
+        //예전 코드
+//        let cell = tableView.dequeueReusableCell(withIdentifier: "noteCardCell") as! noteCardTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "noteCardListCell") as! EmbedingTableViewCell
+//        cell.delegate = self.
         cell.indexPath = indexPath
         let tapgesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped(sender: )))
         cell.noteLabel.isUserInteractionEnabled = true
@@ -57,9 +59,10 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         cell.noteLabel.text = noteCards[indexPath.row].noteCardText
         tapgesture.view?.tag = cell.indexPath.row
         cell.noteTextField.delegate = self
-        
+        cell.listOfCard = noteCards[indexPath.row].siblingNotes
+//
         return cell
-        //        return cell
+       
         
     }
     
@@ -129,7 +132,8 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         layoutFloatButton()
     }
     
-    var focusedCellItem : noteCardTableViewCell?
+//    var focusedCellItem : noteCardTableViewCell? 테이블뷰일 떄 꺼
+    var focusedCellItem : EmbedingTableViewCell?
     
     //MARK: floating button(viewWillLayoutSubViews 때 해야 됨)
     
@@ -158,7 +162,7 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         noteCards.append(newNote)
         let indexPathRow = noteCards.count - 1
         let indexPath = IndexPath.init(row:indexPathRow, section:0)
-        let itemCell = noteCardTableView.cellForRow(at: indexPath) as! noteCardTableViewCell
+        let itemCell = noteCardTableView.cellForRow(at: indexPath) as! EmbedingTableViewCell
         itemCell.noteTextField.text = itemCell.noteLabel.text
         itemCell.noteLabel.isHidden = true
         itemCell.noteTextField.isHidden = false
@@ -179,7 +183,7 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         print("tapped!\(String(describing: sender.view?.tag))")
         let indexPathRow = sender.view?.tag
         let indexPath = IndexPath.init(row:indexPathRow!, section:0)
-        let itemCell = noteCardTableView.cellForRow(at: indexPath) as! noteCardTableViewCell
+        let itemCell = noteCardTableView.cellForRow(at: indexPath) as! EmbedingTableViewCell
         itemCell.noteTextField.text = noteCards[indexPathRow!].noteCardText
         itemCell.noteLabel.isHidden = true
         itemCell.noteTextField.isHidden = false
@@ -202,8 +206,8 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     //그 후 포커스를 SiblingCard로 넘긴다 - 고쳐야 함
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         noteCards[(focusedCellItem?.indexPath.row)!].noteCardText = focusedCellItem?.noteTextField.text ?? ""
-        var siblingCard = NoteCard(text:"")
-        noteCards[(focusedCellItem?.indexPath.row)!].addSibling(add: siblingCard, atFirstPlace: true)
+//        var siblingCard = NoteCard(text:"")
+//        noteCards[(focusedCellItem?.indexPath.row)!].addSibling(add: siblingCard, atFirstPlace: true)
         return false
     }
     
