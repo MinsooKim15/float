@@ -17,6 +17,7 @@ struct NoteCard {
     var noteCardIsTodoDone : Bool
     var noteCardIsAgenda : Bool
     var noteCardIsPinned : Bool
+    var noteCardBody : String
     private static func makeIdentifierByDate()->(String){
         let now = Date()
         let date = DateFormatter()
@@ -56,5 +57,6 @@ struct NoteCard {
         self.noteCardIsPinned  = false
         self.noteCardIsTodoDone = false
         self.siblingNotes = []
+        self.noteCardBody = ""
     }
 }

@@ -70,10 +70,8 @@
 				0202E90321C3840B007F5F20 /* HomeViewController.swift */,
 				0202E91D21C394D4007F5F20 /* NoteCard.swift */,
 				0202E91B21C39374007F5F20 /* FloatingButton.swift */,
-				0202E91721C384CB007F5F20 /* noteCardTableViewCell.swift */,
+				02A7785421EAD89600A51A5F /* cells */,
 				0202E90521C3840B007F5F20 /* Main.storyboard */,
-				02100B1A21E63B4B004DBA16 /* EmbededCollectionViewCell.swift */,
-				02EE1A3021CBE2E900415FB1 /* EmbedingTableViewCell.swift */,
 				0202E90B21C3840C007F5F20 /* Assets.xcassets */,
 				0202E91021C3840C007F5F20 /* Info.plist */,
 				0202E90821C3840B007F5F20 /* float.xcdatamodeld */,
@@ -88,6 +86,16 @@
 				0202E90D21C3840C007F5F20 /* LaunchScreen.storyboard */,
 			);
 			path = supportingFiles;
+			sourceTree = "<group>";
+		};
+		02A7785421EAD89600A51A5F /* cells */ = {
+			isa = PBXGroup;
+			children = (
+				0202E91721C384CB007F5F20 /* noteCardTableViewCell.swift */,
+				02100B1A21E63B4B004DBA16 /* EmbededCollectionViewCell.swift */,
+				02EE1A3021CBE2E900415FB1 /* EmbedingTableViewCell.swift */,
+			);
+			path = cells;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
