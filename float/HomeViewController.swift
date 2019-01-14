@@ -8,7 +8,23 @@
 
 import UIKit
 
-class HomeViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OptionButtonsDelegate, UITextFieldDelegate {
+class HomeViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, OptionButtonsForListCellDelegate, UITextFieldDelegate {
+    
+    func getNoteCard(at sibling: Int) -> (NoteCard) {
+        return noteCards[focusedIndex ?? 0].siblingNotes[sibling]
+    }
+    func getNoteCardList() ->([NoteCard]){
+        return noteCards[focusedIndex ?? 0].siblingNotes
+    }
+    
+    func setNoteCard(at sibling: Int, to item: NoteCard) {
+        if noteCards[focusedIndex ?? 0].siblingNotes.count == 0{
+            let cellItem = NoteCard(text:"and")
+            noteCards[focusedIndex ?? 0].siblingNotes.append(cellItem)
+        }
+        noteCards[focusedIndex ?? 0].siblingNotes[sibling] = item
+    }
+    
     /*
      image Source 위치 변수
      */
@@ -27,6 +43,7 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     var noteCards:[NoteCard] = []{
         didSet{
             noteCardTableView.reloadData()
+            
         }
     }
     func saveAsNoteCard(_ text:String){
@@ -43,6 +60,7 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
         return 500
         
     }
@@ -52,18 +70,22 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
 //        let cell = tableView.dequeueReusableCell(withIdentifier: "noteCardCell") as! noteCardTableViewCell
         //Cell 코드를 너무 많이 의존하고 있다. 데이터 부분으로 넘기는 방법이 있을까?
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "noteCardCell") as! noteCardTableViewCell
+//        let cell = tableView.dequeueReusableCell(withIdentifier: "noteCardCell") as! noteCardTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "noteCardListCell") as! EmbedingTableViewCell
         cell.delegate = self
         cell.indexPath = indexPath
         let tapgesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped(sender: )))
         cell.noteLabel.isUserInteractionEnabled = true
     cell.noteLabel.addGestureRecognizer(tapgesture)
         cell.noteLabel.text = noteCards[indexPath.row].noteCardText
+        cell.noteLabel.sizeToFit()
         tapgesture.view?.tag = cell.indexPath.row
         cell.noteTextField.delegate = self
-        cell.noteBodyTextField.delegate = self
-        
-        cell.noteBodyLabel.text = noteCards[indexPath.row].noteCardBody
+        cell.listOfCard = noteCards[indexPath.row].siblingNotes
+//        cell.noteBodyTextField.delegate = self
+//        cell.noteBodyLabel.text = noteCards[indexPath.row].noteCardBody
+//        cell.noteBodyLabel.lineBreakMode = .byWordWrapping
+//        cell.noteBodyLabel.sizeToFit()
         return cell
     }
     
@@ -136,8 +158,9 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         layoutFloatButton()
     }
     
-    var focusedCellItem : noteCardTableViewCell?
-//    var focusedCellItem : EmbedingTableViewCell? 콜렉션 뷰일 때 쓰는 거
+//    var focusedCellItem : noteCardTableViewCell?
+    var focusedCellItem : EmbedingTableViewCell?
+    var focusedIndex : Int?
     
     //MARK: floating button(viewWillLayoutSubViews 때 해야 됨)
     
@@ -166,12 +189,12 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         noteCards.append(newNote)
         let indexPathRow = noteCards.count - 1
         let indexPath = IndexPath.init(row:indexPathRow, section:0)
-        let itemCell = noteCardTableView.cellForRow(at: indexPath) as! noteCardTableViewCell
+        let itemCell = noteCardTableView.cellForRow(at: indexPath) as! EmbedingTableViewCell
         itemCell.noteTextField.text = itemCell.noteLabel.text
         itemCell.noteLabel.isHidden = true
         itemCell.noteTextField.isHidden = false
         itemCell.noteTextField.becomeFirstResponder()
-        
+        focusedIndex = indexPathRow
         focusedCellItem = itemCell
     }
 
@@ -188,11 +211,12 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         print("tapped!\(String(describing: sender.view?.tag))")
         let indexPathRow = sender.view?.tag
         let indexPath = IndexPath.init(row:indexPathRow!, section:0)
-        let itemCell = noteCardTableView.cellForRow(at: indexPath) as! noteCardTableViewCell
+        let itemCell = noteCardTableView.cellForRow(at: indexPath) as! EmbedingTableViewCell
         itemCell.noteTextField.text = noteCards[indexPathRow!].noteCardText
         itemCell.noteLabel.isHidden = true
         itemCell.noteTextField.isHidden = false
         itemCell.noteTextField.becomeFirstResponder()
+        focusedIndex = indexPathRow
         focusedCellItem = itemCell
     }
     @objc func endTextField(sender:Any?){
@@ -207,13 +231,13 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
             focusedCellItem?.noteLabel.isHidden = false
             focusedCellItem?.noteTextField.isHidden = true
         }
-        else if textField == focusedCellItem?.noteBodyTextField{
-            print("Yeah!!! Body!")
-            noteCards[(focusedCellItem?.indexPath.row)!].noteCardBody = focusedCellItem?.noteBodyTextField.text ?? ""
-            focusedCellItem?.noteBodyLabel.isHidden = false
-            focusedCellItem?.noteBodyTextField.isHidden = true
-            focusedCellItem = nil
-        }
+//        else if textField == focusedCellItem?.noteBodyTextField{
+//            print("Yeah!!! Body!")
+//            noteCards[(focusedCellItem?.indexPath.row)!].noteCardBody = focusedCellItem?.noteBodyTextField.text ?? ""
+//            focusedCellItem?.noteBodyLabel.isHidden = false
+//            focusedCellItem?.noteBodyTextField.isHidden = true
+//            focusedCellItem = nil
+//        }
         
     }
     func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -226,17 +250,19 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         if textField  == focusedCellItem?.noteTextField{
             noteCards[(focusedCellItem?.indexPath.row)!].noteCardText = focusedCellItem?.noteTextField.text ?? ""
             noteCards[(focusedCellItem?.indexPath.row)!].noteCardText = focusedCellItem?.noteTextField.text ?? ""
-            focusedCellItem?.noteBodyLabel.isHidden = true
-            focusedCellItem?.noteBodyTextField.isHidden = false
-//            focusedCellItem?.noteTextField.resignFirstResponder()
-            focusedCellItem?.noteBodyTextField.becomeFirstResponder()
+//            focusedCellItem?.noteBodyLabel.isHidden = true
+//            focusedCellItem?.noteBodyTextField.isHidden = false
+            focusedCellItem?.noteTextField.resignFirstResponder()
+            noteCards[focusedIndex ?? 0].siblingNotes.append(NoteCard(text:"Yeah"))
+            //아래에서 두 개로 함수를 나눴다. 하나의 함수에는 siblingNotes 추가, 다른함수에는 displayCell 확인
+            // 만약 이게 되면? 함수 단위로 시간이 흐른다..?
+            focusedCellItem?.startNewText()
+//            focusedCellItem?.noteBodyTextField.becomeFirstResponder()
         }
-        else if textField == focusedCellItem?.noteBodyTextField{
-            noteCards[(focusedCellItem?.indexPath.row)!].noteCardBody = focusedCellItem?.noteBodyTextField.text ?? ""
-            focusedCellItem?.noteBodyTextField.resignFirstResponder()
-        }
+//        else if textField == focusedCellItem?.noteBodyTextField{
+//            noteCards[(focusedCellItem?.indexPath.row)!].noteCardBody = focusedCellItem?.noteBodyTextField.text ?? ""
+//            focusedCellItem?.noteBodyTextField.resignFirstResponder()
+//        }
         return true
     }
 }
-
-

@@ -11,6 +11,10 @@ import UIKit
 class EmbededCollectionViewCell: UICollectionViewCell {
     
     @IBOutlet weak var noteLabel: UILabel!
-    @IBOutlet weak var noteLabelTextField: UITextField!
+    @IBOutlet weak var noteLabelTextField: UITextField!{
+        didSet{
+            self.noteLabelTextField.isHidden = true
+        }
+    }
     
 }

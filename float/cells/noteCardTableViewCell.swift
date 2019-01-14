@@ -101,7 +101,6 @@ class noteCardTableViewCell: UITableViewCell {
     @IBOutlet weak var noteLabel: UILabel!
     
     
-    
     @IBOutlet weak var noteTextField: UITextField!{
         didSet{
             self.noteTextField.isHidden = true
@@ -117,8 +116,6 @@ class noteCardTableViewCell: UITableViewCell {
     }
     
     override func layoutSubviews() {
-        if todoButtonState {
-        }
     }
     
 }

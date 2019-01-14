@@ -15,14 +15,18 @@ protocol OptionButtonsForListCellDelegate{
     func pinButtonTapped(at index: IndexPath)
     func calendarButtonTapped(at index: IndexPath)
     func tableViewCell(tableViewCell: noteCardTableViewCell)
+    func getNoteCard(at sibling: Int) -> (NoteCard)
+    func setNoteCard(at sibling:Int, to item : NoteCard)
+    func getNoteCardList() -> ([NoteCard])
 }
 
 
 class EmbedingTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionViewDataSource, UITextFieldDelegate {
-    var delegate: OptionButtonsDelegate!
+    var delegate: OptionButtonsForListCellDelegate!
     
     var indexPath : IndexPath!
     
+
     //원래 코드
     
     /*
@@ -53,7 +57,10 @@ class EmbedingTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollec
     var pinButtonState = false
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return listOfCard?.count ?? 0
+        return self.delegate?.getNoteCardList().count ?? 0
+    }
+    func reloadCollectionViewData(){
+        noteCollectionView.reloadData()
     }
 
     // 버튼 정의 가자
@@ -100,8 +107,10 @@ class EmbedingTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollec
     
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        print("**CellFromItemAt")
         let cell = noteCollectionView.dequeueReusableCell(withReuseIdentifier: "noteCardCollectionCell", for: indexPath) as! EmbededCollectionViewCell
-        cell.noteLabel.text = listOfCard?[indexPath.row].noteCardText
+//        cell.noteLabel.text = self.delegate?.getNoteCard(at:indexPath.row).noteCardText
+        cell.noteLabel.text = "Yeah"
         cell.noteLabel.isUserInteractionEnabled = true
         let tapgesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped(sender: )))
         cell.noteLabel.addGestureRecognizer(tapgesture)
@@ -120,8 +129,11 @@ class EmbedingTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollec
         itemCell.noteLabelTextField.isHidden = false
         itemCell.noteLabelTextField.becomeFirstResponder()
         focusedCellItem = itemCell
+        focusedIndex = indexPathRow
     }
     var focusedCellItem : EmbededCollectionViewCell?
+    var focusedIndex : Int?
+    //TODO: 이거 없앨거야
     var listOfCard:[NoteCard]?
     
     @IBOutlet weak var noteLabel: UILabel!
@@ -134,13 +146,37 @@ class EmbedingTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollec
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        
-        
+        noteCollectionView.delegate = self
+        noteCollectionView.dataSource = self
+        print("awakeFromNib")
     }
     func textFieldDidEndEditing(_ textField: UITextField) {
-        
+//        listOfCard[focusedIndex].noteCardText = focusedCellItem.noteLabelTextField.text
+        let cellItem = NoteCard(text: focusedCellItem?.noteLabelTextField.text ?? "")
+//        var cellItemList = []
+//        cellItemList.append(cellItem)
+        self.delegate?.setNoteCard(at: focusedIndex ?? 0, to: cellItem)
     }
-    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        let cellItem = NoteCard(text: focusedCellItem?.noteLabelTextField.text ?? "")
+        self.delegate.setNoteCard(at: focusedIndex ?? 0, to: cellItem)
+        focusedCellItem?.noteLabel.isHidden = false
+        focusedCellItem?.noteLabelTextField.isHidden = true
+        focusedCellItem?.noteLabelTextField.resignFirstResponder()
+        
+        if focusedIndex != self.delegate.getNoteCardList().count - 1{
+            print("focusedIndex는")
+            print(focusedIndex)
+            print("notecardList길이는")
+            print(self.delegate.getNoteCardList().count)
+            let selectedItem = noteCollectionView.cellForItem(at: IndexPath(row: focusedIndex!+1, section:0)) as! EmbededCollectionViewCell
+            selectedItem.noteLabelTextField.text = selectedItem.noteLabel.text
+            selectedItem.noteLabel.isHidden = true
+            selectedItem.noteLabelTextField.isHidden = false
+            selectedItem.noteLabelTextField.becomeFirstResponder()
+        }
+        return true
+    }
     
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -149,17 +185,32 @@ class EmbedingTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollec
         // Configure the view for the selected state
     }
     
-    @IBOutlet weak var noteCollectionView: UICollectionView!
+    func startNewText(){
+        self.delegate?.setNoteCard(at: 0, to: NoteCard(text: "and"))
+        DispatchQueue.main.async {
+            self.noteCollectionView.reloadData()
+            print("reloadData")
+        }
+        print(self.delegate?.getNoteCard(at:indexPath.row).noteCardText)
+        print(self.delegate?.getNoteCardList())
+        print("displaycells!")
+        print(noteCollectionView.visibleCells)
+//        let selectedItem = noteCollectionView.cellForItem(at: IndexPath.init(row: 0, section:0)) as! EmbededCollectionViewCell
+//        selectedItem.noteLabelTextField.text = selectedItem.noteLabel.text
+//        selectedItem.noteLabel.isHidden = true
+//        selectedItem.noteLabelTextField.isHidden = false
+//        selectedItem.noteLabelTextField.becomeFirstResponder()
+//        focusedCellItem = selectedItem
+//        focusedIndex = 0
+    }
+    
+    @IBOutlet weak var noteCollectionView: UICollectionView!{
+        didSet{
+            
+        }
+    }
 }
 
-
+extension UICollectionView{
     
-
-
-
-
-
-    
-
-    
-
+}

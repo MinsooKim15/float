@@ -29,7 +29,6 @@ struct NoteCard {
         return ID
     }
     var siblingNotes : [NoteCard]
-    
     mutating func addSibling(add card: NoteCard, atFirstPlace firstPlaceHolder : Bool) {
         if self.siblingNotes.count > 0 {
             if firstPlaceHolder {
